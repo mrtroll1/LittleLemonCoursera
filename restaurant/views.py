@@ -9,7 +9,8 @@ from datetime import datetime
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from rest_framework.viewsets import ModelViewSet
 
@@ -48,6 +49,7 @@ class MenuItemView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
 class BookingViewSet(ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
+    permission_classes = [IsAuthenticated]
 
 @csrf_exempt
 def bookings(request):
