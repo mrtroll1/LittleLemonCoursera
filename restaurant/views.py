@@ -11,8 +11,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.response import Response
 
 
 # Create your views here.
@@ -41,20 +42,12 @@ def book(request):
 class MenuView(generics.ListCreateAPIView):
     queryset = Menu.objects.all()
     serializer_class = MenuSerializer
+    permission_classes = [IsAuthenticated]
 
 class MenuItemView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
     queryset = Menu.objects.all()
     serializer_class = MenuSerializer
-
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from .models import Booking
-from .serializers import BookingSerializer
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import ValidationError
+    permission_classes = [IsAuthenticated]
 
 class BookingViewSet(ModelViewSet):
     queryset = Booking.objects.all()
@@ -76,14 +69,9 @@ class BookingViewSet(ModelViewSet):
         
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        serializer.save()
         
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def perform_create(self, serializer):
-        """Save the new booking."""
-        serializer.save()
-
 
 @csrf_exempt
 def bookings(request):
