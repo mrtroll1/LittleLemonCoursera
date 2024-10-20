@@ -46,10 +46,44 @@ class MenuItemView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
     queryset = Menu.objects.all()
     serializer_class = MenuSerializer
 
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from .models import Booking
+from .serializers import BookingSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import ValidationError
+
 class BookingViewSet(ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        slot_exists = Booking.objects.filter(
+            reservation_date=data['reservation_date'],
+            reservation_slot=data['reservation_slot']
+        ).exists()
+
+        if slot_exists:
+            return Response(
+                {'error': 'This slot is already booked.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        """Save the new booking."""
+        serializer.save()
+
 
 @csrf_exempt
 def bookings(request):
