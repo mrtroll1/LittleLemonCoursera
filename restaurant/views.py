@@ -2,12 +2,16 @@
 from django.shortcuts import render
 from .forms import BookingForm
 from .models import Menu
+from .serializers import MenuSerializer, BookingSerializer
 from django.core import serializers
 from .models import Booking
 from datetime import datetime
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
+from rest_framework.decorators import api_view
+from rest_framework import generics
+from rest_framework.viewsets import ModelViewSet
 
 
 # Create your views here.
@@ -33,18 +37,17 @@ def book(request):
     return render(request, 'book.html', context)
 
 # Add your code here to create new views
-def menu(request):
-    menu_data = Menu.objects.all()
-    main_data = {"menu": menu_data}
-    return render(request, 'menu.html', {"menu": main_data})
+class MenuView(generics.ListCreateAPIView):
+    queryset = Menu.objects.all()
+    serializer_class = MenuSerializer
 
+class MenuItemView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
+    queryset = Menu.objects.all()
+    serializer_class = MenuSerializer
 
-def display_menu_item(request, pk=None): 
-    if pk: 
-        menu_item = Menu.objects.get(pk=pk) 
-    else: 
-        menu_item = "" 
-    return render(request, 'menu_item.html', {"menu_item": menu_item}) 
+class BookingViewSet(ModelViewSet):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
 
 @csrf_exempt
 def bookings(request):
