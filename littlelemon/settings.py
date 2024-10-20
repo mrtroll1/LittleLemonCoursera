@@ -84,7 +84,11 @@ DATABASES = {
         "HOST": "localhost",
         "USER": "djangocoursera",  # change these  
         "PASSWORD": "djangodemo", # to your mysql user details
-        "PORT": "3306"
+        "PORT": "3306",
+        'TEST': {
+            'NAME': 'test_reservations',  # Use the pre-existing test database
+            'MIRROR': None,  # Ensure Django doesn't create a new one
+        },
     }
 }
 
@@ -130,6 +134,8 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Tests
+TEST_DISCOVER_PATTERN = 'test*.py'
 
 # Rest framework 
 REST_FRAMEWORK = {
@@ -147,3 +153,7 @@ REST_FRAMEWORK = {
 
 # Djoser 
 DJOSER={"USER_ID_FIELD":"username"}
+
+DJOSER = {
+    'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',  
+}
